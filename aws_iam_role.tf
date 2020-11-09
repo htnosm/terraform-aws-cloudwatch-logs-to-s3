@@ -5,7 +5,7 @@ resource "aws_iam_role" "subscription_filter" {
   tags = merge(
     var.tags,
     {
-      "Name" = "${var.prefix}subscription-filter"
+      "Name" = "${var.prefix}${var.name}-subscription-filter"
     },
   )
 }
@@ -40,7 +40,7 @@ resource "aws_iam_role" "kinesis_firehose" {
   tags = merge(
     var.tags,
     {
-      "Name" = "${var.prefix}kinesis-firehose"
+      "Name" = "${var.prefix}${var.name}-kinesis-firehose"
     },
   )
 }
@@ -176,9 +176,13 @@ data "aws_iam_policy_document" "kinesis_firehose" {
 
     actions = [
       "logs:PutLogEvents",
+      "logs:CreateLogStream",
     ]
 
-    resources = values(aws_kinesis_firehose_delivery_stream.subscription_filter_firehose)[*].arn
+    resources = [
+      aws_cloudwatch_log_group.subscription_filter_firehose.arn,
+      "${aws_cloudwatch_log_group.subscription_filter_firehose.arn}:*",
+    ]
   }
 }
 
@@ -189,7 +193,7 @@ resource "aws_iam_role" "subscription_filter_processor" {
   tags = merge(
     var.tags,
     {
-      "Name" = "${var.prefix}subscription-filter-processor"
+      "Name" = "${var.prefix}${var.name}-subscription-filter-processor"
     },
   )
 }
@@ -212,21 +216,7 @@ data "aws_iam_policy_document" "assume_role_policy_lambda" {
   }
 }
 
-data "aws_iam_policy_document" "iam_role_policy_subscription_filter_processor" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
-    resources = [
-      aws_cloudwatch_log_group.subscription_filter_processor.arn,
-    ]
-  }
-}
-
-resource "aws_iam_role_policy" "subscription_filter_processor" {
-  name   = "ExecutionRole"
-  role   = aws_iam_role.subscription_filter_processor.id
-  policy = data.aws_iam_policy_document.iam_role_policy_subscription_filter_processor.json
+resource "aws_iam_role_policy_attachment" "subscription_filter_processor_lambda" {
+  role       = aws_iam_role.subscription_filter_processor.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
