@@ -33,13 +33,25 @@ CloudWatch Logs Subscription Filters.
 
 The Key is the name of the delivery stream, and the "{prefix}{name}-" is added.
 For example, if you specify "myloggroup" as Key, the delivery stream name will be "{prefix}{name}-myloggroup".
+
+[CloudWatch Log]
+log_group_name = Log group name
+filter_pattern = Subscription filter pattern ("" matches all log events)
+
+[Firehose]
+buffer_interval           = S3 buffer conditions interval(secounds). Default 300
+buffer_size               = S3 buffer conditions size(MiB). Default 5
+processor_buffer_interval = Lambda buffer interval(secounds). Default 60
+processor_buffer_size     = Lambda buffer conditions size(MiB). Default 3
 EOT
 
   type = map(object({
-    log_group_name  = string
-    filter_pattern  = string
-    buffer_interval = number
-    buffer_size     = number
+    log_group_name            = string
+    filter_pattern            = string
+    buffer_interval           = number
+    buffer_size               = number
+    processor_buffer_interval = number
+    processor_buffer_size     = number
   }))
 }
 

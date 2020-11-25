@@ -61,6 +61,27 @@ resource "aws_kinesis_firehose_delivery_stream" "subscription_filter_firehose" {
           parameter_name  = "LambdaArn"
           parameter_value = "${aws_lambda_function.subscription_filter_processor.arn}:${aws_lambda_alias.subscription_filter_processor.function_version}"
         }
+
+
+        /*
+        Parameters with default values are not stored with terraform state so appear as changes.
+        Ref: [Add NOTE about default processing\_configuration parameters by elrob · Pull Request \#14943 · hashicorp/terraform\-provider\-aws](https://github.com/hashicorp/terraform-provider-aws/pull/14943)
+        */
+        dynamic "parameters" {
+          for_each = each.value.processor_buffer_interval == 60 ? [] : list(each.value.processor_buffer_interval)
+          content {
+            parameter_name  = "BufferIntervalInSeconds"
+            parameter_value = parameters.value
+          }
+        }
+
+        dynamic "parameters" {
+          for_each = each.value.processor_buffer_size == 3 ? [] : list(each.value.processor_buffer_size)
+          content {
+            parameter_name  = "BufferSizeInMBs"
+            parameter_value = parameters.value
+          }
+        }
       }
     }
 
