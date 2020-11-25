@@ -87,6 +87,7 @@ data "aws_iam_policy_document" "kinesis_firehose" {
       "s3:GetObject",
       "s3:ListBucket",
       "s3:ListBucketMultipartUploads",
+      "s3:AbortBucketMultipartUploads",
       "s3:PutObject",
     ]
 
@@ -184,6 +185,21 @@ data "aws_iam_policy_document" "kinesis_firehose" {
       "${aws_cloudwatch_log_group.subscription_filter_firehose.arn}:*",
     ]
   }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "kinesis:DescribeStream",
+      "kinesis:GetShardIterator",
+      "kinesis:GetRecords",
+      "kinesis:ListShards",
+    ]
+
+    resources = [
+      "arn:aws:kinesis:${var.aws_region}:${data.aws_caller_identity.current.account_id}:stream/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+    ]
+  }
 }
 
 resource "aws_iam_role" "subscription_filter_processor" {
@@ -219,4 +235,25 @@ data "aws_iam_policy_document" "assume_role_policy_lambda" {
 resource "aws_iam_role_policy_attachment" "subscription_filter_processor_lambda" {
   role       = aws_iam_role.subscription_filter_processor.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "subscription_filter_processor" {
+  name   = "KinesisFirehose"
+  role   = aws_iam_role.subscription_filter_processor.id
+  policy = data.aws_iam_policy_document.subscription_filter_processor.json
+}
+
+data "aws_iam_policy_document" "subscription_filter_processor" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "firehose:PutRecord",
+      "firehose:PutRecordBatch",
+    ]
+
+    resources = [
+      "arn:aws:firehose:${var.aws_region}:${data.aws_caller_identity.current.account_id}:deliverystream/${var.prefix}${var.name}-*"
+    ]
+  }
 }
