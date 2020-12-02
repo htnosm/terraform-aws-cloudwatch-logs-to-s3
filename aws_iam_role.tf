@@ -177,11 +177,9 @@ data "aws_iam_policy_document" "kinesis_firehose" {
 
     actions = [
       "logs:PutLogEvents",
-      "logs:CreateLogStream",
     ]
 
     resources = [
-      aws_cloudwatch_log_group.subscription_filter_firehose.arn,
       "${aws_cloudwatch_log_group.subscription_filter_firehose.arn}:*",
     ]
   }
