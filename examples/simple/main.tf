@@ -10,10 +10,12 @@ module "subscription_filter" {
 
   subscription_filters = {
     "aws-lambda-myfunction" = {
-      log_group_name  = "/aws/lambda/myfunction"
-      filter_pattern  = ""
-      buffer_interval = 300
-      buffer_size     = 5
+      log_group_name            = "/aws/lambda/myfunction"
+      filter_pattern            = ""
+      buffer_interval           = 300
+      buffer_size               = 5
+      processor_buffer_interval = 60
+      processor_buffer_size     = 3
     }
   }
   src_dir = "../../src"

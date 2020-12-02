@@ -118,6 +118,13 @@ resource "aws_cloudwatch_log_group" "subscription_filter_firehose" {
   retention_in_days = var.subscription_filter_firehose_log_group_retention_in_days
 }
 
+resource "aws_cloudwatch_log_stream" "subscription_filter_firehose" {
+  for_each = var.subscription_filters
+
+  name           = "${var.prefix}${var.name}-${each.key}"
+  log_group_name = aws_cloudwatch_log_group.subscription_filter_firehose.name
+}
+
 resource "aws_cloudwatch_log_subscription_filter" "subscription_filter" {
   for_each = var.subscription_filters
 
