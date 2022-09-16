@@ -1,9 +1,8 @@
 module "subscription_filter" {
   source = "../../"
 
-  prefix             = "simple-"
-  aws_region         = "ap-northeast-1"
-  aws_s3_bucket_name = "cloudwatch-logs.123456789012.ap-northeast-1"
+  prefix         = "simple-"
+  s3_bucket_name = "cloudwatch-logs.123456789012.ap-northeast-1"
   tags = {
     Environment = "dev"
   }

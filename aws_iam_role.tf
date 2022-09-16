@@ -1,11 +1,11 @@
 resource "aws_iam_role" "subscription_filter" {
-  name               = "${var.prefix}${var.name}-subscription-filter"
+  name               = "${local.name}-subscription-filter"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy_subscription_filter.json
 
   tags = merge(
     var.tags,
     {
-      "Name" = "${var.prefix}${var.name}-subscription-filter"
+      "Name" = "${local.name}-subscription-filter"
     },
   )
 }
@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "assume_role_policy_subscription_filter" {
 
     principals {
       identifiers = [
-        "logs.${var.aws_region}.amazonaws.com",
+        "logs.${data.aws_region.current.name}.amazonaws.com",
       ]
 
       type = "Service"
@@ -34,13 +34,13 @@ resource "aws_iam_role_policy_attachment" "subscription_filter_firehose" {
 }
 
 resource "aws_iam_role" "kinesis_firehose" {
-  name               = "${var.prefix}${var.name}-kinesis-firehose"
+  name               = "${local.name}-kinesis-firehose"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy_kinesis_firehose.json
 
   tags = merge(
     var.tags,
     {
-      "Name" = "${var.prefix}${var.name}-kinesis-firehose"
+      "Name" = "${local.name}-kinesis-firehose"
     },
   )
 }
@@ -120,7 +120,7 @@ data "aws_iam_policy_document" "kinesis_firehose" {
     ]
 
     resources = [
-      "arn:aws:kms:${var.aws_region}:${data.aws_caller_identity.current.account_id}:key/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+      "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
     ]
 
     condition {
@@ -150,7 +150,7 @@ data "aws_iam_policy_document" "kinesis_firehose" {
     ]
 
     resources = [
-      "arn:aws:kms:${var.aws_region}:${data.aws_caller_identity.current.account_id}:key/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+      "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
     ]
 
     condition {
@@ -167,7 +167,7 @@ data "aws_iam_policy_document" "kinesis_firehose" {
       variable = "kms:EncryptionContext:aws:kinesis:arn"
 
       values = [
-        "arn:aws:kinesis:${var.aws_region}:${data.aws_caller_identity.current.account_id}:stream/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+        "arn:aws:kinesis:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stream/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
       ]
     }
   }
@@ -195,19 +195,19 @@ data "aws_iam_policy_document" "kinesis_firehose" {
     ]
 
     resources = [
-      "arn:aws:kinesis:${var.aws_region}:${data.aws_caller_identity.current.account_id}:stream/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+      "arn:aws:kinesis:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stream/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
     ]
   }
 }
 
 resource "aws_iam_role" "subscription_filter_processor" {
-  name               = "${var.prefix}${var.name}-subscription-filter-processor"
+  name               = "${local.name}-subscription-filter-processor"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy_lambda.json
 
   tags = merge(
     var.tags,
     {
-      "Name" = "${var.prefix}${var.name}-subscription-filter-processor"
+      "Name" = "${local.name}-subscription-filter-processor"
     },
   )
 }
@@ -251,7 +251,7 @@ data "aws_iam_policy_document" "subscription_filter_processor" {
     ]
 
     resources = [
-      "arn:aws:firehose:${var.aws_region}:${data.aws_caller_identity.current.account_id}:deliverystream/${var.prefix}${var.name}-*"
+      "arn:aws:firehose:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:deliverystream/${local.name}-*"
     ]
   }
 }
